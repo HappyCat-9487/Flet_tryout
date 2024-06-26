@@ -102,12 +102,17 @@ def main(page: ft.Page):
         )
         
         
-    def hompage():
+    def homepage():
         def logout_click(e):
             page.session.set("logged_in", False)
             page.go("/login")
         
+        def another_click(e):
+            page.session.set("logged_in", False)
+            page.go("/another")
+        
         logout_button = ft.ElevatedButton(text="Logout", on_click=logout_click)
+        another_button = ft.ElevatedButton(text="Another Page", on_click=another_click)
         
         return ft.Container(
             content=ft.Stack(
@@ -121,6 +126,35 @@ def main(page: ft.Page):
                         alignment=ft.alignment.top_right,
                         padding=ft.Padding(10, 10, 10, 10),
                     ),
+                    ft.Container(
+                        content=another_button,
+                        alignment=ft.alignment.top_left,
+                        padding=ft.Padding(10, 10, 10, 10),
+                    ),
+                ]
+            ),
+            alignment=ft.alignment.center,
+            expand=True,
+        )
+        
+    def another_page():
+        def back_click(e):
+            page.go("/auth_check")
+        
+        back_button = ft.ElevatedButton(text="← Back", on_click=back_click)
+        
+        return ft.Container(
+            content=ft.Stack(
+                [
+                    ft.Container(
+                        content=ft.Text(value="You are out of your personal account now", size=40),
+                        alignment=ft.alignment.center,
+                    ),
+                    ft.Container(
+                        content=back_button,
+                        alignment=ft.alignment.top_left,
+                        padding=10,
+                    ),
                 ]
             ),
             alignment=ft.alignment.center,
@@ -130,14 +164,15 @@ def main(page: ft.Page):
     def route_change(route):
         page.views.clear()
         if page.route == "/home":
-            if page.session.get("logged_in"):
-                page.views.append(ft.View(route, [hompage()]))
-                page.session.set("logged_in", False)
+            if not page.session.get("logged_in"):
+                page.go("/auth_check")
             else:
-                page.views.append(ft.View(route, [authentification_check()]))
-        elif page.route == "/login":
-            page.views.append(ft.View(route, [login_page()]))
-        else: 
+                page.views.append(ft.View(route, [homepage()]))
+        elif page.route == "/auth_check":
+            page.views.append(ft.View(route, [authentification_check()]))
+        elif page.route == "/another":
+            page.views.append(ft.View(route, [another_page()]))
+        else:
             page.views.append(ft.View(route, [login_page()]))
         page.update()
     
