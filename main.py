@@ -22,11 +22,13 @@ def main(page: ft.Page):
         
         #Login button click event handler
         def login_click(e):
+            print("Login button clicked")
             username = username_input.value
             password = password_input.value
             
             if authenticate(username, password):
                 page.session.set("logged_in", True)
+                print("Login successful, redirecting to /home")
                 page.go("/home")
             else:
                 message.value = "Login Failed!! Invalid username or password"
@@ -66,11 +68,13 @@ def main(page: ft.Page):
         message = ft.Text(value="", color="red")
         
         def login_click(e):
+            print("Authentication check button clicked")
             username = username_input.value
             password = password_input.value
             
             if authenticate(username, password):
                 page.session.set("logged_in", True)
+                print("Re-login successful, redirecting to /home")
                 page.go("/home")
             else:
                 message.value = "Re-Login Failed!! Invalid username or password"
@@ -105,11 +109,15 @@ def main(page: ft.Page):
     def homepage():
         def logout_click(e):
             page.session.set("logged_in", False)
+            print("Logout button clicked.")
             page.go("/login")
+            page.update()
         
         def another_click(e):
             page.session.set("logged_in", False)
+            print("Another Page button clicked.")
             page.go("/another")
+            page.update()
         
         logout_button = ft.ElevatedButton(text="Logout", on_click=logout_click)
         another_button = ft.ElevatedButton(text="Another Page", on_click=another_click)
@@ -140,6 +148,7 @@ def main(page: ft.Page):
     def another_page():
         def back_click(e):
             page.go("/auth_check")
+            page.update()
         
         back_button = ft.ElevatedButton(text="← Back", on_click=back_click)
         
@@ -162,16 +171,22 @@ def main(page: ft.Page):
         )
         
     def route_change(route):
+        print(f"Route changed to {route}.")
         page.views.clear()
         if page.route == "/home":
             if not page.session.get("logged_in"):
-                page.go("/auth_check")
+                print("Not logged in. Redirecting to login.")
+                page.go("/login")
             else:
                 page.views.append(ft.View(route, [homepage()]))
         elif page.route == "/auth_check":
             page.views.append(ft.View(route, [authentification_check()]))
+        elif page.route == "/login":
+            page.views.append(ft.View(route, [login_page()]))
+            print("Login page loaded.")
         elif page.route == "/another":
             page.views.append(ft.View(route, [another_page()]))
+
         else:
             page.views.append(ft.View(route, [login_page()]))
         page.update()
